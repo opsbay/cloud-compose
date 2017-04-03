@@ -1,0 +1,32 @@
+{
+  "variables": {
+    "aws_region": "",
+    "aws_source_ami": ""
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "{{user `aws_region`}}",
+      "source_ami": "{{user `aws_source_ami`}}",
+      "instance_type": "t2.small",
+      "ssh_username": "ubuntu",
+      "ami_name": "cloud-compose-{{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "cloud-compose.sh",
+      "destination": "/tmp/cloud-compose.sh"
+    },
+    {
+      "type": "file",
+      "source": "rc.local",
+      "destination": "/tmp/rc.local"
+    },
+    {
+      "type": "shell",
+      "script": "install.sh"
+    }
+  ]
+}
