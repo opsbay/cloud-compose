@@ -17,15 +17,17 @@ using [GetParameters](http://docs.aws.amazon.com/systems-manager/latest/APIRefer
 ## Create the AMI
 
 ```sh
-packer build \
+$ git clone https://github.com/pierredavidbelanger/cloud-compose
+$ cd cloud-compose
+$ packer build \
     -var 'aws_region=us-east-2' \
     -var 'aws_source_ami=ami-fcc19b99' \
     ami.json
 ```
 
-## User the AMI
+## Use the AMI
 
-Launch an EC2 instance with a user-data like this one:
+Launch an EC2 instance with the AMI created above and this user-data content:
 
 ```yaml
 #cloud-config
