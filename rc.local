@@ -11,6 +11,6 @@
 #
 # By default this script does nothing.
 
-/usr/local/sbin/cloud-compose.sh
+/usr/local/sbin/cloud-compose.sh > /var/log/cloud-compose.log 2>&1
 
 exit 0
