@@ -9,12 +9,14 @@ if [ -f "/var/lib/cloud-compose/docker-compose.yml" ]; then
     region=$(curl -fs http://169.254.169.254/latest/dynamic/instance-identity/document | jq .region -r)
     public_ip=$(curl -fs http://169.254.169.254/latest/meta-data/public-ipv4)
     private_ip=$(curl -fs http://169.254.169.254/latest/meta-data/local-ipv4)
+    asg_name=$(aws autoscaling describe-auto-scaling-instances --region $region --instance-ids $instance_id | jq '.AutoScalingInstances[0].AutoScalingGroupName // empty' -r)
 
     # env
     rm -f .env
     echo "HOST_INSTANCE_ID=$instance_id" | tee -a .env
     echo "HOST_PUBLIC_IP=$public_ip" | tee -a .env
     echo "HOST_PRIVATE_IP=$private_ip" | tee -a .env
+    echo "HOST_ASG_NAME=$asg_name" | tee -a .env
     echo "HOST_HOSTNAME=$HOSTNAME" | tee -a .env
     tags_json=$(aws ec2 describe-tags --region $region --filters "Name=resource-id,Values=$instance_id")
     for key in $(echo $tags_json | jq -r ".[][].Key"); do
@@ -24,9 +26,9 @@ if [ -f "/var/lib/cloud-compose/docker-compose.yml" ]; then
     done
 
     # docker login
-    docker_username=$(aws ssm get-parameters --region $region --names docker.username | jq .Parameters[0].Value -r)
-    if [ "$docker_username" != "null" ]; then
-        docker_password=$(aws ssm get-parameters --region $region --names docker.password | jq .Parameters[0].Value -r)
+    docker_username=$(aws ssm get-parameters --region $region --names docker.username | jq '.Parameters[0].Value // empty' -r)
+    if [ "$docker_username" != "" ]; then
+        docker_password=$(aws ssm get-parameters --region $region --names docker.password | jq '.Parameters[0].Value // empty' -r)
         docker login -u $docker_username -p $docker_password
     fi
 
