@@ -21,7 +21,7 @@ $ git clone https://github.com/pierredavidbelanger/cloud-compose
 $ cd cloud-compose
 $ packer build \
     -var 'aws_region=us-east-2' \
-    -var 'aws_source_ami=ami-fcc19b99' \
+    -var 'aws_source_ami=ami-618fab04' \
     ami.json
 ```
 
