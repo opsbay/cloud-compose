@@ -10,7 +10,7 @@
       "source_ami": "{{user `aws_source_ami`}}",
       "instance_type": "t2.small",
       "ssh_username": "ubuntu",
-      "ami_name": "cloud-compose-{{timestamp}}"
+      "ami_name": "Cloud Compose {{isotime \"2006-01-02 1504\" | clean_ami_name}}"
     }
   ],
   "provisioners": [
