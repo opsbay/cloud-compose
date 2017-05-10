@@ -18,12 +18,21 @@ if [ -f "/var/lib/cloud-compose/docker-compose.yml" ]; then
     echo "HOST_PRIVATE_IP=$private_ip" | tee -a .env
     echo "HOST_ASG_NAME=$asg_name" | tee -a .env
     echo "HOST_HOSTNAME=$HOSTNAME" | tee -a .env
-    tags_json=$(aws ec2 describe-tags --region $region --filters "Name=resource-id,Values=$instance_id")
-    for key in $(echo $tags_json | jq -r ".[][].Key"); do
-        value=$(echo $tags_json | jq -r ".[][] | select(.Key==\"$key\") | .Value")
-        key=$(echo $key | tr '-' '_' | tr ':' '_' | tr '.' '_')
-        echo "$key=$value" | tee -a .env
-    done
+    if [ "$asg_name" != "" ]; then
+        tags_json=$(aws autoscaling describe-tags --region $region --filters "Name=auto-scaling-group,Values=$asg_name")
+        for key in $(echo $tags_json | jq -r ".[][].Key"); do
+            value=$(echo $tags_json | jq -r ".[][] | select(.Key==\"$key\") | .Value")
+            key=$(echo $key | tr '-' '_' | tr ':' '_' | tr '.' '_')
+            echo "$key=$value" | tee -a .env
+        done
+    else
+        tags_json=$(aws ec2 describe-tags --region $region --filters "Name=resource-id,Values=$instance_id")
+        for key in $(echo $tags_json | jq -r ".[][].Key"); do
+            value=$(echo $tags_json | jq -r ".[][] | select(.Key==\"$key\") | .Value")
+            key=$(echo $key | tr '-' '_' | tr ':' '_' | tr '.' '_')
+            echo "$key=$value" | tee -a .env
+        done
+    fi
 
     # docker login
     docker_username=$(aws ssm get-parameters --region $region --names docker.username | jq '.Parameters[0].Value // empty' -r)
